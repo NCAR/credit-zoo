@@ -485,13 +485,22 @@ SFNO backbone (Bonev et al. 2023) with two consecutive time steps concatenated a
 
 ## Adding a New Model
 
-credit-zoo models register themselves into CREDIT's model factory via the `@register_model` decorator
-(`credit.models.register_model`) rather than editing anything in the `credit` package — see the
+credit-zoo models are plain `credit.models.base_model.BaseModel` subclasses with no CREDIT-specific
+decoration. They register into CREDIT's model factory purely through a config's `custom_objects:` block
+(`credit.registry.load_custom_objects`) rather than editing anything in the `credit` package — see the
 [repo README](../../README.md) for the full mechanism.
 
 1. Create `credit_zoo/models/<name>/<name>.py` with a `CREDIT<Name>` class subclassing
-   `credit.models.base_model.BaseModel`.
+   `credit.models.base_model.BaseModel`. No decorator needed.
 2. The class must accept `(B, C, H, W)` or `(B, C, T, H, W)` and return `(B, C, 1, H, W)`.
-3. Decorate it with `@register_model("<name>", "Loading <Name> ...")`.
-4. Add a config example in `config/<name>.yml`.
-5. Update this file.
+3. Add a config example in `config/<name>.yml`, including:
+   ```yaml
+   custom_objects:
+     <name>:
+       object_type: model
+       module_path: credit_zoo.models.<name>.<name>
+       module_name: CREDIT<Name>
+   model:
+     type: "<name>"
+   ```
+4. Update this file.

@@ -1,3 +1,9 @@
+custom_objects:
+  sfno:
+    object_type: model
+    module_path: credit_zoo.models.sfno.sfno
+    module_name: CREDITSfno
+
 save_loc: '/glade/derecho/scratch/$USER/CREDIT_runs/sfno'
 seed: 1000
 

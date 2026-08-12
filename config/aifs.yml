@@ -1,3 +1,9 @@
+custom_objects:
+  aifs:
+    object_type: model
+    module_path: credit_zoo.models.aifs.aifs
+    module_name: CREDITAifs
+
 save_loc: '/glade/derecho/scratch/$USER/CREDIT_runs/aifs'
 seed: 1000
 

@@ -1,3 +1,9 @@
+custom_objects:
+  aurora:
+    object_type: model
+    module_path: credit_zoo.models.aurora.model
+    module_name: CREDITAurora
+
 seed: 1000
 
 save_loc: '/glade/derecho/scratch/schreck/model_zoo_smoke/aurora'

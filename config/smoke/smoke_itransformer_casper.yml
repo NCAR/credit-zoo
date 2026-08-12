@@ -1,3 +1,9 @@
+custom_objects:
+  itransformer:
+    object_type: model
+    module_path: credit_zoo.models.itransformer.itransformer
+    module_name: CREDITiTransformer
+
 seed: 1000
 
 save_loc: '/glade/derecho/scratch/schreck/model_zoo_smoke/itransformer'

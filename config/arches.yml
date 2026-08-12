@@ -1,3 +1,9 @@
+custom_objects:
+  arches:
+    object_type: model
+    module_path: credit_zoo.models.arches.arches
+    module_name: CREDITArchesWeather
+
 save_loc: '/glade/derecho/scratch/$USER/CREDIT_runs/arches'
 seed: 1000
 

@@ -25,7 +25,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 from einops import rearrange
 from credit.models.base_model import BaseModel
-from credit.models import register_model
 
 
 # ---------------------------------------------------------------------------
@@ -392,8 +391,6 @@ class SwinRNNModel(nn.Module):
 # ---------------------------------------------------------------------------
 
 
-
-@register_model("swinrnn", "Loading SwinRNN (Swin encoder-decoder) ...")
 class CREDITSwinRNN(BaseModel):
     """CREDIT wrapper for SwinRNN.  Flat (B, C, H, W) I/O."""
 

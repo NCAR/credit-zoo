@@ -14,7 +14,8 @@ architecture notes) and [`docs/models.md`](docs/models.md) for `torch.compile` c
 
 This repo does not vendor or modify any CREDIT core code. It depends on `credit` (the `miles-credit`
 package) as an ordinary pip dependency and plugs into it purely through CREDIT's public extension point,
-`credit.models.register_model`.
+`credit.registry.load_custom_objects` (the config-level `custom_objects:` block). Model classes here are
+plain `credit.models.base_model.BaseModel` subclasses with no CREDIT-specific decoration at all.
 
 ## Install
 
@@ -34,15 +35,18 @@ pip install -e ".[extras]"
 
 ## Usage
 
-Each model class self-registers into CREDIT's model factory via the `@register_model` decorator, so
-nothing in `credit` itself needs to change. The recommended way to use a zoo model with the `credit` CLI
-is to point a config's `custom_models:` list at the model's source file — CREDIT imports it (which runs
-the decorator, registering the model type) before `load_model` runs:
+`credit` resolves `model.type` through its internal registry, and `load_model` calls
+`credit.registry.load_custom_objects(conf)` before dispatching — so any model listed under a config's
+`custom_objects:` block gets imported and registered by dotted path, with zero changes to `credit` itself
+and no decorator on the model class. Add one entry per zoo model you want to use in that run:
 
 ```yaml
 # my_config.yml
-custom_models:
-  - '/path/to/credit-zoo/credit_zoo/models/aurora/model.py'
+custom_objects:
+  aurora:
+    object_type: model
+    module_path: credit_zoo.models.aurora.model
+    module_name: CREDITAurora
 
 save_loc: '/glade/derecho/scratch/$USER/CREDIT_runs/aurora'
 
@@ -54,28 +58,22 @@ model:
   # ... remaining model/data/trainer config, see config/aurora.yml for a full example
 ```
 
-`custom_models` paths go through `os.path.expandvars`, so `$WORK`/`$USER`-style variables work, but the
-path is otherwise resolved as given — use an absolute path (or a path relative to wherever `credit` is
-invoked from). If you're calling `load_model` from your own script instead of the CLI, importing the
-module directly has the same effect:
+Requires `credit_zoo` to be installed (`pip install -e .` here, or a normal `pip install`) so
+`module_path` resolves as an ordinary import — `custom_objects` does not accept file paths, only
+importable dotted paths. If you're calling `load_model` from your own script instead of the `credit` CLI,
+`load_custom_objects` still does the work as long as it runs before `load_model`'s registry lookup (it
+does, internally); you never need to import the zoo model module yourself.
 
-```python
-import credit_zoo.models.aurora.model  # registers "aurora" as a side-effect
-from credit.models import load_model
-
-model = load_model(conf)  # conf["model"]["type"] == "aurora"
-```
-
-See `credit/models/__init__.py::register_model` in `miles-credit` for the full decorator contract, and
-the [`config/`](config) directory here for a complete example config per model.
+See `credit/registry.py::load_custom_objects` in `miles-credit` for the full mechanism (also covers
+datasets, preblocks, postblocks, losses, and metrics), and the [`config/`](config) directory here for a
+complete example config per model — each already includes its `custom_objects:` block.
 
 ## Repo layout
 
 - `credit_zoo/models/<name>/` — one directory per model (`__init__.py`, implementation file(s), usually a
   `README.md`). `credit_zoo/models/MODELS.md` is the full model-by-model reference.
-- `config/` — per-model training configs (`config/<name>.yml`), moved verbatim from the original PR.
-  **Note:** these configs use `model: type: <key>` alone; add a `custom_models:` entry (see above) before
-  running one, since the type key is not registered until the corresponding model file is imported.
+- `config/` — per-model training configs (`config/<name>.yml`), moved verbatim from the original PR and
+  updated to carry the `custom_objects:` block described above, so each runs as-is.
 - `config/smoke/` — smaller smoke-test configs and shell launchers (`run_all_local.sh`,
   `submit_all_casper.sh`, `submit_noinit_casper.sh`, `submit_pretrained_casper.sh`) for quick
   forward/backward-pass validation on NCAR HPC.

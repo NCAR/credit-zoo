@@ -1,3 +1,9 @@
+custom_objects:
+  swinrnn:
+    object_type: model
+    module_path: credit_zoo.models.swinrnn.swinrnn
+    module_name: CREDITSwinRNN
+
 seed: 1000
 
 save_loc: '/glade/derecho/scratch/schreck/model_zoo_smoke/swinrnn'

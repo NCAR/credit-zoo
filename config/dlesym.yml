@@ -1,3 +1,9 @@
+custom_objects:
+  dlesym:
+    object_type: model
+    module_path: credit_zoo.models.dlesym.dlesym
+    module_name: CREDITDLESyM
+
 save_loc: '/glade/derecho/scratch/$USER/CREDIT_runs/dlesym'
 seed: 1000
 

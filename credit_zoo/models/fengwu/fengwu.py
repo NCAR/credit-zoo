@@ -22,7 +22,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 from einops import rearrange
 from credit.models.base_model import BaseModel
-from credit.models import register_model
 
 
 # ---------------------------------------------------------------------------
@@ -462,8 +461,6 @@ class FengWuModel(nn.Module):
 # ---------------------------------------------------------------------------
 
 
-
-@register_model("fengwu", "Loading FengWu (2D Swin Transformer encoder-fuser-decoder) ...")
 class CREDITFengWu(BaseModel):
     """CREDIT wrapper for FengWu.  Flat (B, C, H, W) I/O; returns (B, C_out, 1, H, W)."""
 

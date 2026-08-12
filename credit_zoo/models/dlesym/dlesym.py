@@ -33,7 +33,6 @@ from credit_zoo.models.healpix.healpix import (
     _build_index_buffers,
 )
 from credit.models.base_model import BaseModel
-from credit.models import register_model
 
 try:
     import importlib.util
@@ -490,8 +489,6 @@ class HEALPixRecUNet(nn.Module):
 # ---------------------------------------------------------------------------
 
 
-
-@register_model("dlesym", "Loading DLESyM (HEALPix ConvNeXt U-Net, DLESyM atmospheric backbone) ...")
 class CREDITDLESyM(BaseModel):
     """CREDIT wrapper for the DLESyM atmospheric backbone (HEALPixRecUNet).
 

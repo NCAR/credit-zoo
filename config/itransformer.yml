@@ -1,3 +1,9 @@
+custom_objects:
+  itransformer:
+    object_type: model
+    module_path: credit_zoo.models.itransformer.itransformer
+    module_name: CREDITiTransformer
+
 save_loc: '/glade/derecho/scratch/$USER/CREDIT_runs/itransformer'
 seed: 1000
 

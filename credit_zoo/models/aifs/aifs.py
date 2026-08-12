@@ -33,7 +33,6 @@ from torch_geometric.data import HeteroData
 from torch_geometric.nn.conv import MessagePassing
 from torch_geometric.utils import softmax
 from credit.models.base_model import BaseModel
-from credit.models import register_model
 
 try:
     from flash_attn import flash_attn_func as _flash_attn_func
@@ -671,8 +670,6 @@ class AIFSEncProcDec(nn.Module):
 # ---------------------------------------------------------------------------
 
 
-
-@register_model("aifs", "Loading AIFS (GNN encoder → Transformer processor → GNN decoder) ...")
 class CREDITAifs(BaseModel):
     """
     CREDIT wrapper for AIFS.  Flat (B, C, H, W) I/O; returns (B, C_out, 1, H, W).

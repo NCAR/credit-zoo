@@ -28,7 +28,6 @@ import sys
 import torch
 import torch.nn as nn
 from credit.models.base_model import BaseModel
-from credit.models import register_model
 
 try:
     from torch_harmonics import (
@@ -295,8 +294,6 @@ class FCN3Net(nn.Module):
 # ---------------------------------------------------------------------------
 
 
-
-@register_model("fourcastnet3", "Loading FourCastNet3 (DISCO + diagonal-harmonic spherical operator) ...")
 class CREDITFourCastNetV3(BaseModel):
     """
     CREDIT wrapper for FourCastNet3.  Flat (B, C, H, W) I/O; returns (B, C_out, 1, H, W).

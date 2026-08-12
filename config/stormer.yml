@@ -1,3 +1,9 @@
+custom_objects:
+  stormer:
+    object_type: model
+    module_path: credit_zoo.models.stormer.stormer
+    module_name: CREDITStormer
+
 save_loc: '/glade/derecho/scratch/$USER/CREDIT_runs/stormer'
 seed: 1000
 

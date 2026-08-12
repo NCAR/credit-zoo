@@ -1,3 +1,9 @@
+custom_objects:
+  corrdiff:
+    object_type: model
+    module_path: credit_zoo.models.corrdiff.corrdiff
+    module_name: CREDITCorrDiff
+
 save_loc: '/glade/derecho/scratch/$USER/CREDIT_runs/corrdiff'
 seed: 1000
 

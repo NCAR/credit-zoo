@@ -1,3 +1,9 @@
+custom_objects:
+  ace:
+    object_type: model
+    module_path: credit_zoo.models.ace.ace
+    module_name: CREDITACE
+
 save_loc: '/glade/derecho/scratch/$USER/CREDIT_runs/ace'
 seed: 1000
 

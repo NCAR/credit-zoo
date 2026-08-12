@@ -18,7 +18,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 from einops import rearrange
 from credit.models.base_model import BaseModel
-from credit.models import register_model
 
 
 # ---------------------------------------------------------------------------
@@ -239,8 +238,6 @@ class ClimaX(nn.Module):
 # ---------------------------------------------------------------------------
 
 
-
-@register_model("climax", "Loading ClimaX (per-variable tokenization ViT) ...")
 class CREDITClimaX(BaseModel):
     """
     CREDIT wrapper for ClimaX.  Accepts/returns flat (B, C, H, W) tensors.

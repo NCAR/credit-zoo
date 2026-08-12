@@ -26,7 +26,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 from einops import rearrange
 from credit.models.base_model import BaseModel
-from credit.models import register_model
 
 
 # ---------------------------------------------------------------------------
@@ -188,8 +187,6 @@ class VAEBottleneck(nn.Module):
 # ---------------------------------------------------------------------------
 
 
-
-@register_model("fuxi_ens", "Loading FuXi-ENS (ViT + VAE ensemble perturbation head) ...")
 class CREDITFuXiENS(BaseModel):
     """
     FuXi-ENS: VAE perturbation head on a plain ViT backbone.

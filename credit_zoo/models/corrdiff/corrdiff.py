@@ -25,7 +25,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from credit.models.base_model import BaseModel
-from credit.models import register_model
 
 
 # ---------------------------------------------------------------------------
@@ -310,8 +309,6 @@ class SongUNet(nn.Module):
 # ---------------------------------------------------------------------------
 
 
-
-@register_model("corrdiff", "Loading CorrDiff (score-based conditional diffusion) ...")
 class CREDITCorrDiff(BaseModel):
     """
     CREDIT wrapper for CorrDiff score-based downscaling.

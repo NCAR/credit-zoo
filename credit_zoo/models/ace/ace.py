@@ -36,13 +36,10 @@ from credit_zoo.models.sfno.sfno import SFNOModel, _HARMONICS_AVAILABLE
 
 import logging
 from credit.models.base_model import BaseModel
-from credit.models import register_model
 
 logger = logging.getLogger(__name__)
 
 
-
-@register_model("ace", "Loading ACE2 (SFNO with 2-step input, AI2 Climate Emulator v2) ...")
 class CREDITACE(BaseModel):
     """ACE2 climate emulator architecture for CREDIT training.
 

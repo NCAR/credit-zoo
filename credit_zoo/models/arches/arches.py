@@ -17,7 +17,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 from einops import rearrange
 from credit.models.base_model import BaseModel
-from credit.models import register_model
 
 
 # ---------------------------------------------------------------------------
@@ -291,8 +290,6 @@ class ArchesWeatherBackbone(nn.Module):
 # ---------------------------------------------------------------------------
 
 
-
-@register_model("arches", "Loading ArchesWeather (window + column attention) ...")
 class CREDITArchesWeather(BaseModel):
     """CREDIT wrapper around ArchesWeatherBackbone."""
 

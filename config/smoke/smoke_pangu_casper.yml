@@ -1,3 +1,9 @@
+custom_objects:
+  pangu:
+    object_type: model
+    module_path: credit_zoo.models.pangu.pangu
+    module_name: CREDITPangu
+
 seed: 1000
 
 save_loc: '/glade/derecho/scratch/schreck/model_zoo_smoke/pangu'

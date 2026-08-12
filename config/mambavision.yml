@@ -1,3 +1,9 @@
+custom_objects:
+  mambavision:
+    object_type: model
+    module_path: credit_zoo.models.mambavision.mambavision
+    module_name: CREDITMambaVision
+
 save_loc: '/glade/derecho/scratch/$USER/CREDIT_runs/mambavision'
 seed: 1000
 

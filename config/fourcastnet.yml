@@ -1,3 +1,9 @@
+custom_objects:
+  fourcastnet:
+    object_type: model
+    module_path: credit_zoo.models.fourcastnet.afno
+    module_name: CREDITFourCastNet
+
 save_loc: '/glade/derecho/scratch/$USER/CREDIT_runs/fourcastnet'
 seed: 1000
 

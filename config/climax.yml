@@ -1,3 +1,9 @@
+custom_objects:
+  climax:
+    object_type: model
+    module_path: credit_zoo.models.climax.climax
+    module_name: CREDITClimaX
+
 save_loc: '/glade/derecho/scratch/$USER/CREDIT_runs/climax'
 seed: 1000
 

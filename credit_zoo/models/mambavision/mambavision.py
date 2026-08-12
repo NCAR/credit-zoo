@@ -19,7 +19,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 from einops import rearrange
 from credit.models.base_model import BaseModel
-from credit.models import register_model
 
 # Optionally use the real mamba_ssm selective SSM
 try:
@@ -250,8 +249,6 @@ class MambaVisionBackbone(nn.Module):
 # ---------------------------------------------------------------------------
 
 
-
-@register_model("mambavision", "Loading MambaVision (hybrid Mamba + attention U-Net) ...")
 class CREDITMambaVision(BaseModel):
     """CREDIT wrapper around MambaVisionBackbone."""
 

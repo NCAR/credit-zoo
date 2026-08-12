@@ -32,7 +32,6 @@ from .gnn_layers import (
 )
 from .icosahedral import Graph
 from credit.models.base_model import BaseModel
-from credit.models import register_model
 
 __all__ = ["GraphCastNet", "CREDITGraphCast"]
 
@@ -385,8 +384,6 @@ class GraphCastNet(nn.Module):
 # ---------------------------------------------------------------------------
 
 
-
-@register_model("graphcast", "Loading GraphCast (icosahedral GNN: Grid2Mesh → processor → Mesh2Grid) ...")
 class CREDITGraphCast(BaseModel):
     """CREDIT wrapper for GraphCastNet.
 

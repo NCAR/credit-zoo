@@ -1,3 +1,9 @@
+custom_objects:
+  aurora:
+    object_type: model
+    module_path: credit_zoo.models.aurora.model
+    module_name: CREDITAurora
+
 save_loc: '/glade/derecho/scratch/$USER/CREDIT_runs/aurora'
 seed: 1000
 

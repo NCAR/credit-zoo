@@ -22,7 +22,6 @@ import sys
 import torch
 import torch.nn as nn
 from credit.models.base_model import BaseModel
-from credit.models import register_model
 
 
 # ---------------------------------------------------------------------------
@@ -282,8 +281,6 @@ class iTransformerBackbone(nn.Module):
 # ---------------------------------------------------------------------------
 
 
-
-@register_model("itransformer", "Loading iTransformer (inverted attention across variables) ...")
 class CREDITiTransformer(BaseModel):
     """
     Thin CREDIT wrapper around iTransformerBackbone.

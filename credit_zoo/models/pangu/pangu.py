@@ -37,7 +37,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 from timm.layers import DropPath, trunc_normal_
 from credit.models.base_model import BaseModel
-from credit.models import register_model
 
 __all__ = ["PanguModel", "CREDITPangu"]
 
@@ -826,8 +825,6 @@ class PanguModel(nn.Module):
 # ---------------------------------------------------------------------------
 
 
-
-@register_model("pangu", "Loading Pangu-Weather (3D Earth Transformer) ...")
 class CREDITPangu(BaseModel):
     """Pangu-Weather adapted to CREDIT's flat ``(B, C, H, W)`` tensor convention.
 

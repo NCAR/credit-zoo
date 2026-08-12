@@ -16,7 +16,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 from einops import rearrange
 from credit.models.base_model import BaseModel
-from credit.models import register_model
 
 
 # ---------------------------------------------------------------------------
@@ -208,8 +207,6 @@ class StormerViT(nn.Module):
 # ---------------------------------------------------------------------------
 
 
-
-@register_model("stormer", "Loading Stormer (plain ViT weather model) ...")
 class CREDITStormer(BaseModel):
     """
     Thin CREDIT wrapper around StormerViT.

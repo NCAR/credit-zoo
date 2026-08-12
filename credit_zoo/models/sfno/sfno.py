@@ -33,7 +33,6 @@ except ImportError:
 
 from einops import rearrange
 from credit.models.base_model import BaseModel
-from credit.models import register_model
 
 
 # ---------------------------------------------------------------------------
@@ -231,8 +230,6 @@ class SFNOModel(nn.Module):
 # ---------------------------------------------------------------------------
 
 
-
-@register_model("sfno", "Loading SFNO (Spherical Fourier Neural Operator) ...")
 class CREDITSfno(BaseModel):
     """
     CREDIT wrapper for SFNO.  Flat (B, C, H, W) I/O.

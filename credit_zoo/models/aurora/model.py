@@ -50,7 +50,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from credit.models.base_model import BaseModel
-from credit.models import register_model
 
 try:
     from .aurora import Aurora
@@ -63,8 +62,6 @@ except ImportError:
 __all__ = ["CREDITAurora"]
 
 
-
-@register_model("aurora", "Loading Aurora (Perceiver3D + Swin3D backbone) ...")
 class CREDITAurora(BaseModel):
     """Aurora wrapped for CREDIT's flat-tensor training pipeline.
 

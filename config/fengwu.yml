@@ -1,3 +1,9 @@
+custom_objects:
+  fengwu:
+    object_type: model
+    module_path: credit_zoo.models.fengwu.fengwu
+    module_name: CREDITFengWu
+
 save_loc: '/glade/derecho/scratch/$USER/CREDIT_runs/fengwu'
 seed: 1000
 

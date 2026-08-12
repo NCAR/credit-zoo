@@ -1,3 +1,9 @@
+custom_objects:
+  healpix:
+    object_type: model
+    module_path: credit_zoo.models.healpix.healpix
+    module_name: CREDITHEALPix
+
 save_loc: '/glade/derecho/scratch/$USER/CREDIT_runs/healpix'
 seed: 1000
 

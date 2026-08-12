@@ -19,7 +19,6 @@ import torch.nn.functional as F
 import torch.fft
 from einops import rearrange
 from credit.models.base_model import BaseModel
-from credit.models import register_model
 
 
 # ---------------------------------------------------------------------------
@@ -254,8 +253,6 @@ class FourCastNet(nn.Module):
 # ---------------------------------------------------------------------------
 
 
-
-@register_model("fourcastnet", "Loading FourCastNet v1 (AFNO ViT) ...")
 class CREDITFourCastNet(BaseModel):
     """
     CREDIT wrapper for FourCastNet (AFNO).  Flat (B, C, H, W) I/O.

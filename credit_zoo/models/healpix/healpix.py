@@ -40,7 +40,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from credit.models.base_model import BaseModel
-from credit.models import register_model
 
 try:
     import healpy as hp
@@ -408,8 +407,6 @@ def _build_index_buffers(nside, H, W, lat_range, lon_range):
 # ---------------------------------------------------------------------------
 
 
-
-@register_model("healpix", "Loading DLWP-HEALPix (HEALPix U-Net with lat/lon reprojection) ...")
 class CREDITHEALPix(BaseModel):
     """
     CREDIT wrapper for DLWP-HEALPix.  Accepts/returns flat (B, C, H, W) lat/lon tensors.
