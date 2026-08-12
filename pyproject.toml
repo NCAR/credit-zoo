@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "credit-zoo"
+authors = [{ name = "NCAR Machine Integration and Learning for Earth Systems (MILES)", email = "miles@ucar.edu" }]
+readme = "README.md"
+license = {text = "Apache-2.0"}
+dynamic = ["version"]
+requires-python = ">=3.11"
+dependencies = [
+    "credit @ git+ssh://git@github.com/NCAR/miles-credit.git",
+    "torch",
+    "numpy",
+    "scipy",
+    "einops",
+    "timm",
+    "torch_geometric",
+    "torch-harmonics<0.9",
+    "healpy",
+]
+
+[project.optional-dependencies]
+# Optional accelerators / format converters used by individual models when installed;
+# every model falls back to a pure-PyTorch (or informative-error) path without these.
+extras = [
+    "flash_attn",       # aifs: fused attention kernel (falls back to F.scaled_dot_product_attention)
+    "mamba_ssm",        # mambavision: real selective-SSM kernel (falls back to a pure-PyTorch approximation)
+    "scikit-learn",      # graphcast: NearestNeighbors for icosahedral mesh construction
+    "torch_scatter",     # graphcast: fused scatter-add (falls back to torch.Tensor.scatter_add_)
+    "xarray",             # aurora: Batch <-> NetCDF conversion helpers
+    "netcdf4",            # aurora: Batch <-> NetCDF conversion helpers
+]
+
+develop = ["pre-commit", "ruff", "pytest"]
+
+[tool.setuptools.packages.find]
+include = ["credit_zoo*"]
+
+[tool.setuptools.package-data]
+"credit_zoo.models" = ["*.md", "*.yml"]
+
+[tool.setuptools_scm]
+version_file = "credit_zoo/_version.py"
+
+[tool.ruff]
+src = ["credit_zoo", "tests"]
+line-length = 120
+exclude = [".git"]
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]
+ignore = ["D417", "F841"]
+
+[tool.pytest.ini_options]
+addopts = "--continue-on-collection-errors"

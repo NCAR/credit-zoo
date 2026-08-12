@@ -216,3 +216,16 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# credit-zoo specific
+credit_zoo/_version.py
+
+# PBS batch job output/error logs
+*.o[0-9]*
+*.e[0-9]*
+
+# Model checkpoints
+*.pt
+*.pth
+checkpoint.pt
+model_checkpoint.pt
