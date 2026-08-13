@@ -1,90 +1,83 @@
 # credit-zoo
 
-A collection of community/reference model architectures for [CREDIT](https://github.com/NCAR/miles-credit)
-(Community Research Earth Digital Intelligence Twin), NSF NCAR's platform for training and deploying AI
-atmospheric prediction models. This repo was extracted from `miles-credit` PR #312 ("model-zoo") so the
-zoo models can be maintained and versioned independently of CREDIT core.
+## About
 
-It currently ships 19 model architectures ported into CREDIT's `(B, C, H, W)` / `(B, C, T, H, W)` tensor
-interface: `ace`, `aifs`, `arches`, `aurora`, `climax`, `corrdiff`, `dlesym`, `fengwu`, `fourcastnet`,
-`fourcastnet3`, `fuxi_ens`, `graphcast`, `healpix`, `itransformer`, `mambavision`, `pangu`, `sfno`,
-`stormer`, `swinrnn`. See [`credit_zoo/models/MODELS.md`](credit_zoo/models/MODELS.md) for the full
-reference (distributed-training support, pretrained-weight compatibility, licenses, and per-model
-architecture notes) and [`docs/models.md`](docs/models.md) for `torch.compile` compatibility notes.
+credit-zoo is a collection of community/reference model architectures for [CREDIT](https://github.com/NCAR/miles-credit)
+(Community Research Earth Digital Intelligence Twin), NSF NCAR's open-source platform for training and deploying
+AI atmospheric prediction models. It ships CREDIT-compatible ports of published architectures — Aurora, Pangu-Weather,
+GraphCast, FourCastNet, ClimaX, and more — so they can be trained and evaluated through the same `credit` CLI and
+config pipeline as CREDIT's built-in models, without living in CREDIT core.
 
-This repo does not vendor or modify any CREDIT core code. It depends on `credit` (the `miles-credit`
-package) as an ordinary pip dependency and plugs into it purely through CREDIT's public extension point,
-`credit.registry.load_custom_objects` (the config-level `custom_objects:` block). Model classes here are
-plain `credit.models.base_model.BaseModel` subclasses with no CREDIT-specific decoration at all.
+credit-zoo does not vendor or modify any CREDIT code. It depends on `credit` (the `miles-credit` package) as an
+ordinary pip dependency and plugs into it through CREDIT's public extension point,
+[`custom_objects`](https://miles-credit.readthedocs.io/en/latest/) — every model here is a plain
+`credit.models.base_model.BaseModel` subclass with no CREDIT-specific decoration.
 
-## Install
+**New to CREDIT itself?** See the [CREDIT Quickstart](https://miles-credit.readthedocs.io/en/latest/quickstart.html)
+first — credit-zoo assumes a working `credit` install.
+
+## Getting started
 
 ```bash
 pip install -e .
 ```
 
-This pulls in `credit` (from `git+ssh://git@github.com/NCAR/miles-credit.git`) plus the third-party
-packages the zoo models need (`torch_geometric`, `torch-harmonics`, `timm`, `healpy`, `scipy`, ...). A few
-per-model accelerators (`flash_attn`, `mamba_ssm`, `torch_scatter`, `scikit-learn`, `xarray`) are optional
-— every model falls back to a pure-PyTorch path (or a clear error naming the missing package) when they
-are absent — and are grouped under the `extras` optional-dependency:
+installs `credit_zoo` plus `credit` (from `git+ssh://git@github.com/NCAR/miles-credit.git`) and the third-party
+packages the zoo models need. A few per-model accelerators (`flash_attn`, `mamba_ssm`, `torch_scatter`,
+`scikit-learn`, `xarray`) are optional — every model falls back to a pure-PyTorch path when they're absent — and
+live under the `extras` group:
 
 ```bash
 pip install -e ".[extras]"
 ```
 
-## Usage
+Every model in [`config/`](config) already ships a runnable example config with its `custom_objects:` block
+pre-filled, so training one is the same as training any CREDIT model:
 
-`credit` resolves `model.type` through its internal registry, and `load_model` calls
-`credit.registry.load_custom_objects(conf)` before dispatching — so any model listed under a config's
-`custom_objects:` block gets imported and registered by dotted path, with zero changes to `credit` itself
-and no decorator on the model class. Add one entry per zoo model you want to use in that run:
+```bash
+credit check -c config/aurora.yml   # validate first
+credit train -c config/aurora.yml
+```
+
+To wire a zoo model into your own config, add one `custom_objects` entry per model you use:
 
 ```yaml
-# my_config.yml
 custom_objects:
   aurora:
     object_type: model
     module_path: credit_zoo.models.aurora.model
     module_name: CREDITAurora
 
-save_loc: '/glade/derecho/scratch/$USER/CREDIT_runs/aurora'
-
 model:
   type: "aurora"
-  surf_vars: ["2t", "10u", "10v", "msl"]
-  atmos_vars: ["z", "u", "v", "t", "q"]
-  atmos_levels: [50, 100, 150, 200, 250, 300, 400, 500, 600, 700, 850, 925, 1000]
-  # ... remaining model/data/trainer config, see config/aurora.yml for a full example
+  # ... see config/aurora.yml for a complete example
 ```
 
-Requires `credit_zoo` to be installed (`pip install -e .` here, or a normal `pip install`) so
-`module_path` resolves as an ordinary import — `custom_objects` does not accept file paths, only
-importable dotted paths. If you're calling `load_model` from your own script instead of the `credit` CLI,
-`load_custom_objects` still does the work as long as it runs before `load_model`'s registry lookup (it
-does, internally); you never need to import the zoo model module yourself.
+`credit`'s `load_model` calls `credit.registry.load_custom_objects(conf)` before dispatching, so this is all that's
+needed — no changes to `credit` itself, and the module only needs to be *importable* (`credit_zoo` installed), not
+imported by hand.
 
-See `credit/registry.py::load_custom_objects` in `miles-credit` for the full mechanism (also covers
-datasets, preblocks, postblocks, losses, and metrics), and the [`config/`](config) directory here for a
-complete example config per model — each already includes its `custom_objects:` block.
+## Available models
 
-## Repo layout
+`ace`, `aifs`, `arches`, `aurora`, `climax`, `corrdiff`, `dlesym`, `fengwu`, `fourcastnet`, `fourcastnet3`,
+`fuxi_ens`, `graphcast`, `healpix`, `itransformer`, `mambavision`, `pangu`, `sfno`, `stormer`, `swinrnn` — 19
+architectures ported into CREDIT's `(B, C, H, W)` / `(B, C, T, H, W)` tensor interface. See
+[`credit_zoo/models/MODELS.md`](credit_zoo/models/MODELS.md) for the full per-model reference (papers, source
+links, pretrained-weight availability, and architecture notes).
 
-- `credit_zoo/models/<name>/` — one directory per model (`__init__.py`, implementation file(s), usually a
-  `README.md`). `credit_zoo/models/MODELS.md` is the full model-by-model reference.
-- `config/` — per-model training configs (`config/<name>.yml`), moved verbatim from the original PR and
-  updated to carry the `custom_objects:` block described above, so each runs as-is.
-- `config/smoke/` — smaller smoke-test configs and shell launchers (`run_all_local.sh`,
-  `submit_all_casper.sh`, `submit_noinit_casper.sh`, `submit_pretrained_casper.sh`) for quick
-  forward/backward-pass validation on NCAR HPC.
-- `tests/` — `test_model_zoo.py` (forward/backward smoke test for every model) and
-  `test_model_zoo_train.py` (a short real training loop per model).
-- `scripts/` — `compute_wb2_stats.py` / `submit_wb2_stats.sh`, WeatherBench2 verification statistics.
-- `docs/models.md` — `torch.compile` compatibility notes for the zoo models.
+## Documentation
+
+- [`credit_zoo/models/MODELS.md`](credit_zoo/models/MODELS.md) — per-model reference and the guide for adding a
+  new model.
+- [`docs/models.md`](docs/models.md) — `torch.compile` compatibility notes.
+- `config/smoke/` — smoke-test configs and HPC launch scripts (`submit_all_casper.sh`, `submit_all_derecho.sh`)
+  for a quick forward/backward-pass check of every model.
+- The full [CREDIT documentation](https://miles-credit.readthedocs.io/en/latest/) covers the `custom_objects`
+  registry mechanism, the gen2 config schema, and everything else this repo builds on.
 
 ## License
 
-Apache-2.0 (see `LICENSE`), matching `miles-credit`. Several individual model ports carry their own
-upstream license note in their model directory — see `credit_zoo/models/MODELS.md`'s "Credits & Licenses"
-table for the full per-model breakdown (several are MIT/BSD/Apache-2.0; a couple, like `pangu`'s original
-weights, are non-commercial-only).
+Apache-2.0 (see `LICENSE`), matching `miles-credit`. Several individual model ports carry their own upstream
+license note — see the "Credits & Licenses" table in
+[`credit_zoo/models/MODELS.md`](credit_zoo/models/MODELS.md) (most are MIT/BSD/Apache-2.0; a few, like Pangu's
+original weights, are non-commercial-only).
