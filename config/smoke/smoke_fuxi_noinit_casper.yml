@@ -18,17 +18,18 @@ save_loc: '/glade/derecho/scratch/schreck/model_zoo_smoke_noinit/fuxi'
 data:
   source:
     ERA5:
+      dataset_type: "local"
       level_coord: "level"
       levels: [1., 9., 19., 29., 39., 49., 59., 69., 79., 89., 97., 104., 111., 116., 122., 126.]
       variables:
         prognostic:
           vars_3D: ["u_component_of_wind", "v_component_of_wind", "temperature", "specific_total_water"]
           vars_2D: ["SP", "VAR_2T", "VAR_10U", "VAR_10V", "total_precipitation", "evaporation", "top_net_thermal_radiation"]
-          path: "/glade/campaign/cisl/aiml/ksha/CREDIT_data/ERA5_mlevel_1deg/all_in_one/ERA5_mlevel_1deg_6h_subset_*.zarr"
+          path: "/glade/campaign/cisl/aiml/ksha/CREDIT_data/ERA5_mlevel_1deg/all_in_one/ERA5_mlevel_1deg_6h_subset_%Y_conserve.zarr"
           filename_time_format: "%Y"
         dynamic_forcing:
           vars_2D: ["toa_incident_solar_radiation"]
-          path: "/glade/campaign/cisl/aiml/ksha/CREDIT_data/ERA5_mlevel_1deg/all_in_one/ERA5_mlevel_1deg_6h_subset_*.zarr"
+          path: "/glade/campaign/cisl/aiml/ksha/CREDIT_data/ERA5_mlevel_1deg/all_in_one/ERA5_mlevel_1deg_6h_subset_%Y_conserve.zarr"
           filename_time_format: "%Y"
         static:
           vars_2D: ["z_norm", "land_sea_mask"]
@@ -43,21 +44,37 @@ data:
 validation_data:
   start_datetime: "2014-01-01"
   end_datetime: "2018-12-31"
+  timestep: "6h"
+  forecast_len: 1
 
 preblocks:
-  norm:
-    type: era5_normalizer
-    args:
-      mean_path: "/glade/campaign/cisl/aiml/ksha/CREDIT_data/ERA5_mlevel_1deg/mean_std/mean_6h_1979_2019_conserve_1deg.nc"
-      std_path: "/glade/campaign/cisl/aiml/ksha/CREDIT_data/ERA5_mlevel_1deg/mean_std/std_6h_1979_2019_conserve_1deg.nc"
-      levels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+  per_step:
+    norm:
+      type: era5_normalizer
+      args:
+        mean_path: "/glade/campaign/cisl/aiml/ksha/CREDIT_data/ERA5_mlevel_1deg/mean_std/mean_6h_1979_2019_conserve_1deg.nc"
+        std_path: "/glade/campaign/cisl/aiml/ksha/CREDIT_data/ERA5_mlevel_1deg/mean_std/std_6h_1979_2019_conserve_1deg.nc"
+    concat:
+      type: concat
+
+postblocks:
+  per_step:
+    reconstruct:
+      type: reconstruct
+      args:
+        detach: false
+    reconstruct_target:
+      type: reconstruct
+      args:
+        in_key: 'y'
+        out_key: 'y_target_processed'
 
 model:
     type: "fuxi"
     frames: 1
+    levels: 16
     image_height: 181
     image_width: 360
-    levels: 16
     channels: 4
     surface_channels: 7
     input_only_channels: 3
@@ -84,6 +101,11 @@ loss:
 trainer:
     type: era5-gen2
     mode: none
+
+    parallelism:
+        data: none
+        tensor: 1
+        domain: 1
 
     load_weights: False
     load_optimizer: False

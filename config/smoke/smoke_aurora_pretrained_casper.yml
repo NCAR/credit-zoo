@@ -23,13 +23,14 @@ save_loc: '/glade/derecho/scratch/schreck/model_zoo_smoke_pretrained/aurora'
 data:
   source:
     ERA5:
+      dataset_type: "local"
       level_coord: "level"
       levels: [1., 9., 19., 29., 39., 49., 59., 69., 79., 89., 97., 104., 111., 116., 122., 126., 131., 136.]
       variables:
         prognostic:
           vars_3D: ["u_component_of_wind", "v_component_of_wind", "temperature", "specific_total_water"]
           vars_2D: ["SP", "VAR_2T", "VAR_10U", "VAR_10V"]
-          path: "/glade/campaign/cisl/aiml/ksha/CREDIT_data/ERA5_mlevel_1deg/all_in_one/ERA5_mlevel_1deg_6h_subset_*.zarr"
+          path: "/glade/campaign/cisl/aiml/ksha/CREDIT_data/ERA5_mlevel_1deg/all_in_one/ERA5_mlevel_1deg_6h_subset_%Y_conserve.zarr"
           filename_time_format: "%Y"
         dynamic_forcing: null
         static:
@@ -45,21 +46,38 @@ data:
 validation_data:
   start_datetime: "2014-01-01"
   end_datetime: "2018-12-31"
+  timestep: "6h"
+  forecast_len: 1
 
 preblocks:
-  norm:
-    type: era5_normalizer
-    args:
-      mean_path: "/glade/campaign/cisl/aiml/ksha/CREDIT_data/ERA5_mlevel_1deg/mean_std/mean_6h_1979_2019_conserve_1deg.nc"
-      std_path: "/glade/campaign/cisl/aiml/ksha/CREDIT_data/ERA5_mlevel_1deg/mean_std/std_6h_1979_2019_conserve_1deg.nc"
+  per_step:
+    norm:
+      type: era5_normalizer
+      args:
+        mean_path: "/glade/campaign/cisl/aiml/ksha/CREDIT_data/ERA5_mlevel_1deg/mean_std/mean_6h_1979_2019_conserve_1deg.nc"
+        std_path: "/glade/campaign/cisl/aiml/ksha/CREDIT_data/ERA5_mlevel_1deg/mean_std/std_6h_1979_2019_conserve_1deg.nc"
+    concat:
+      type: concat
+
+postblocks:
+  per_step:
+    reconstruct:
+      type: reconstruct
+      args:
+        detach: false
+    reconstruct_target:
+      type: reconstruct
+      args:
+        in_key: 'y'
+        out_key: 'y_target_processed'
 
 model:
     type: "aurora"
+    frames: 1
     surf_vars: ["2t", "10u", "10v", "msl"]
     atmos_vars: ["u", "v", "t", "q"]
     static_vars: ["lsm", "z"]
     atmos_levels: [1, 9, 19, 29, 39, 49, 59, 69, 79, 89, 97, 104, 111, 116, 122, 126, 131, 136]
-    levels: 18
     history_size: 1
     timestep_hours: 6
     n_lat: 181
@@ -85,6 +103,11 @@ loss:
 trainer:
     type: era5-gen2
     mode: none
+
+    parallelism:
+        data: none
+        tensor: 1
+        domain: 1
 
     load_weights: False
     load_optimizer: False

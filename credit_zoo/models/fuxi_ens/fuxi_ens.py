@@ -241,6 +241,7 @@ class CREDITFuXiENS(BaseModel):
         in_channels: int = 70,
         out_channels: int = 69,
         img_size: tuple = (192, 288),
+        frames: int = 1,
         patch_size: int = 4,
         embed_dim: int = 512,
         depth: int = 8,

@@ -263,6 +263,7 @@ class CREDITFourCastNet(BaseModel):
         in_channels=20,
         out_channels=20,
         img_size=(128, 256),
+        frames=1,
         patch_size=8,
         embed_dim=768,
         depth=12,
