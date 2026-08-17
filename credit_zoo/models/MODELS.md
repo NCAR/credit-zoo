@@ -481,6 +481,37 @@ Pretrained weights: available via `fme` package — not directly loadable withou
 
 SFNO backbone (Bonev et al. 2023) with two consecutive time steps concatenated along the channel dimension.  Set `history_len: 2` in the data config; CREDIT automatically provides `(B, C, T=2, H, W)` which is reshaped to `(B, 2C, H, W)` before the SFNO.  Output is a single next time step `(B, C_out, 1, H, W)`.  The two-step input gives the model explicit access to the finite-difference tendency, which ACE2 found critical for stable long-rollout behavior.  The full ACE2-ERA5 model is 450M parameters at 1° with conservation constraints (dry air mass, moisture); this CREDIT port matches the architecture but omits the post-processing conservation layer.
 
+#### DscaleTransformer (WRF Regional Downscaling)
+Key: not registered — no `custom_objects` config example yet (see status below)
+
+Kyle Sha (NCAR MILES), ported from the `feature/regional` branch of `miles-credit`.
+Source: [`credit_zoo/models/dscale_wrf/dscale_wrf.py`](dscale_wrf/dscale_wrf.py)
+Pretrained weights: none
+
+FuXi-lineage regional downscaling model: the same `CubeEmbedding` (Conv3d patch embed) +
+U-Transformer (down-sample → `SwinTransformerV2Stage` → up-sample with skip connection)
+backbone as `fuxi`, plus FiLM (Feature-wise Linear Modulation) conditioning on a time
+encoding, plus optional boundary padding (`TensorPadding`) and a gen1-era `PostBlock` hook
+(off by default; that class no longer exists in current `credit`, so it's lazy-imported and
+only breaks if a caller explicitly sets `post_conf.activate: true`).
+
+**Integration status — deliberately partial, ported under time pressure, not yet wired
+into standard CREDIT training:**
+- The class itself is ported and verified: constructs, forward pass produces the correct
+  `(B, C_out, 1, H, W)` shape, gradients flow (`python credit_zoo/models/dscale_wrf/dscale_wrf.py`
+  runs a real forward+backward smoke test with tiny dims).
+- **`forward(self, x, x_extra)` takes two tensors**, not the single `x` every other CREDIT
+  model (and the standard gen2 trainer's `model(x)` call) expects — `x_extra` is the FiLM
+  time-encoding vector. On `feature/regional` this was driven by Kyle's own `trainerWRF.py`
+  and `WRFPreBlock`/downscaling dataset, none of which exist in credit-zoo or on current
+  `credit` main.
+- **Not runnable via `credit train` yet.** Doing that needs either (a) porting the custom
+  WRF trainer/dataset/preblock stack from `feature/regional` (a materially bigger job than
+  this model file), or (b) folding the FiLM conditioning into the standard preblock/postblock
+  pipeline so the model can drop to a single-tensor `forward(x)`. Neither is done here.
+- No smoke config exists yet for this model (unlike every other entry in this file) — one
+  can't be written honestly until one of the two paths above is chosen.
+
 ---
 
 ## Adding a New Model
