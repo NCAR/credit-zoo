@@ -138,11 +138,9 @@ def make_graphcast():
         in_channels=C_IN,
         out_channels=C_OUT,
         img_size=(H, W),
-        latent_dim=64,
-        edge_dim=32,
-        processor_depth=2,
-        k_neighbours=4,
-        mlp_hidden=128,
+        mesh_level=2,
+        processor_layers=2,
+        hidden_dim=32,
     ).to(device)
     return m, torch.randn(B, C_IN, H, W, device=device), (B, C_OUT, H, W)
 
@@ -170,9 +168,9 @@ def make_fourcastnet3():
         in_channels=C_IN,
         out_channels=C_OUT,
         img_size=(H, W),
-        base_dim=32,
-        depth=2,
-        n_stages=2,
+        embed_dim=32,
+        num_layers=2,
+        scale_factor=2,
     ).to(device)
     return m, torch.randn(B, C_IN, H, W, device=device), (B, C_OUT, H, W)
 
@@ -219,18 +217,15 @@ def make_pangu():
 def make_aifs():
     from credit_zoo.models.aifs.aifs import CREDITAifs
 
-    surf_vars = ["2t", "10u"]
-    atmos_vars = ["z", "t"]
-    static_vars = ["lsm"]
-    atmos_levels = [500, 850]
+    C_IN, C_OUT = 20, 18
     m = CREDITAifs(
-        surf_vars=surf_vars,
-        atmos_vars=atmos_vars,
-        static_vars=static_vars,
-        atmos_levels=atmos_levels,
+        in_channels=C_IN,
+        out_channels=C_OUT,
+        img_size=(H, W),
+        num_channels=32,
+        num_layers=2,
+        num_heads=4,
     ).to(device)
-    C_IN = len(surf_vars) + len(atmos_vars) * len(atmos_levels) + len(static_vars)
-    C_OUT = len(surf_vars) + len(atmos_vars) * len(atmos_levels)
     return m, torch.randn(B, C_IN, H, W, device=device), (B, C_OUT, H, W)
 
 
@@ -413,6 +408,9 @@ def run_one(name, factory):
         n_params = _params(model)
 
         y = model(x)
+        # CREDIT models may return (B, C, T=1, H, W); compare against a 4-D expectation without the time dim
+        if y.dim() == 5 and len(expected_shape) == 4 and y.shape[2] == 1:
+            y = y.squeeze(2)
 
         assert y.shape == torch.Size(expected_shape), f"shape {tuple(y.shape)} != {expected_shape}"
         assert not torch.isnan(y).any(), "NaN in output"
