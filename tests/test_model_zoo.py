@@ -1,7 +1,8 @@
 """
 Smoke test for all model-zoo models.
-Run on a GPU node: python tests/test_model_zoo.py
-Prints a markdown table of results.
+
+Under pytest (CI, CPU) each model is a separate forward + backward test.
+Run on a GPU node as a script for a markdown table of results: python tests/test_model_zoo.py
 """
 
 import sys
@@ -9,6 +10,7 @@ import os
 import time
 import traceback
 
+import pytest
 import torch
 
 # Ensure repo root is on path
@@ -431,6 +433,12 @@ def run_one(name, factory):
             "fwd_bwd_ms": "—",
             "err": traceback.format_exc().strip().splitlines()[-1],
         }
+
+
+@pytest.mark.parametrize("name", list(MODELS))
+def test_forward_backward(name):
+    result = run_one(name, MODELS[name])
+    assert result["status"] == "PASS", result["err"]
 
 
 def main():

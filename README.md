@@ -22,7 +22,7 @@ first — credit-zoo assumes a working `credit` install.
 pip install -e .
 ```
 
-installs `credit_zoo` plus `credit` (from `git+ssh://git@github.com/NCAR/miles-credit.git`) and the third-party
+installs `credit_zoo` plus `credit` (from `git+https://github.com/NCAR/miles-credit.git`) and the third-party
 packages the zoo models need. A few per-model accelerators (`flash_attn`, `mamba_ssm`, `torch_scatter`,
 `scikit-learn`, `xarray`) are optional — every model falls back to a pure-PyTorch path when they're absent — and
 live under the `extras` group:
