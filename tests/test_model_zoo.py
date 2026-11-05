@@ -7,6 +7,7 @@ Run on a GPU node as a script for a markdown table of results: python tests/test
 
 import sys
 import os
+import tempfile
 import time
 import traceback
 
@@ -139,7 +140,7 @@ def make_graphcast():
         out_channels=C_OUT,
         img_size=(H, W),
         mesh_level=2,
-        processor_layers=2,
+        processor_layers=3,
         hidden_dim=32,
     ).to(device)
     return m, torch.randn(B, C_IN, H, W, device=device), (B, C_OUT, H, W)
@@ -216,16 +217,23 @@ def make_pangu():
 
 def make_aifs():
     from credit_zoo.models.aifs.aifs import CREDITAifs
+    from credit_zoo.models.aifs.build_graph import build_graph
 
     C_IN, C_OUT = 20, 18
-    m = CREDITAifs(
-        in_channels=C_IN,
-        out_channels=C_OUT,
-        img_size=(H, W),
-        num_channels=32,
-        num_layers=2,
-        num_heads=4,
-    ).to(device)
+    # AIFS needs a pre-built mesh graph; build a small one for this grid (loaded in the constructor)
+    with tempfile.TemporaryDirectory() as tmp:
+        graph_path = os.path.join(tmp, "aifs_graph.pt")
+        build_graph(lat_size=H, lon_size=W, mesh_stride=2, k_g2m=4, k_m2g=4, radius_m2m=None, save_path=graph_path)
+        m = CREDITAifs(
+            in_channels=C_IN,
+            out_channels=C_OUT,
+            img_size=(H, W),
+            num_channels=32,
+            num_layers=2,
+            num_heads=4,
+            trainable_size=4,
+            graph_path=graph_path,
+        ).to(device)
     return m, torch.randn(B, C_IN, H, W, device=device), (B, C_OUT, H, W)
 
 
