@@ -60,8 +60,8 @@ imported by hand.
 ## Available models
 
 `ace`, `aifs`, `arches`, `aurora`, `climax`, `corrdiff`, `dlesym`, `fengwu`, `fourcastnet`, `fourcastnet3`,
-`fuxi_ens`, `graphcast`, `healpix`, `itransformer`, `mambavision`, `pangu`, `sfno`, `stormer`, `swinrnn` — 19
-architectures ported into CREDIT's `(B, C, H, W)` / `(B, C, T, H, W)` tensor interface. See
+`fuxi_ens`, `graphcast`, `healpix`, `itransformer`, `mambavision`, `pangu`, `sfno`, `stormer`, `swinrnn`, `unet`,
+`unet_downscaling` — 21 architectures ported into CREDIT's `(B, C, H, W)` / `(B, C, T, H, W)` tensor interface. See
 [`credit_zoo/models/MODELS.md`](credit_zoo/models/MODELS.md) for the full per-model reference (papers, source
 links, pretrained-weight availability, and architecture notes).
 

@@ -10,14 +10,15 @@ license = {text = "Apache-2.0"}
 dynamic = ["version"]
 requires-python = ">=3.11"
 dependencies = [
-    "credit @ git+ssh://git@github.com/NCAR/miles-credit.git",
+    "miles-credit @ git+ssh://git@github.com/NCAR/miles-credit.git",
     "torch",
     "numpy",
     "scipy",
     "einops",
     "timm",
     "torch_geometric",
-    "torch-harmonics<0.9",
+    "torch-harmonics>=0.8",
+    "segmentation-models-pytorch",
     "healpy",
 ]
 

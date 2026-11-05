@@ -344,6 +344,42 @@ def make_corrdiff():
     return m, torch.randn(B, C_IN, H, W, device=device), (B, C_OUT, H, W)
 
 
+def make_unet():
+    from credit_zoo.models.unet.unet import SegmentationModel
+
+    channels, levels, surface, input_only = 4, 4, 2, 2
+    C_IN = channels * levels + surface + input_only
+    C_OUT = channels * levels + surface
+    m = SegmentationModel(
+        image_height=H,
+        image_width=W,
+        frames=1,
+        channels=channels,
+        levels=levels,
+        surface_channels=surface,
+        input_only_channels=input_only,
+        output_only_channels=0,
+        architecture={"name": "unet", "encoder_name": "resnet18", "encoder_weights": None},
+    ).to(device)
+    return m, torch.randn(B, C_IN, 1, H, W, device=device), (B, C_OUT, 1, H, W)
+
+
+def make_unet_downscaling():
+    from credit_zoo.models.unet_downscaling.unet_downscaling import DownscalingSegmentationModel
+
+    channels = {"boundary": 6, "prognostic": 8, "diagnostic": 2}
+    m = DownscalingSegmentationModel(
+        channels=channels,
+        image_height=H,
+        image_width=W,
+        frames=1,
+        architecture={"name": "unet", "encoder_name": "resnet18", "encoder_weights": None},
+    ).to(device)
+    C_IN = channels["boundary"] + channels["prognostic"]
+    C_OUT = channels["prognostic"] + channels["diagnostic"]
+    return m, torch.randn(B, C_IN, 1, H, W, device=device), (B, C_OUT, 1, H, W)
+
+
 MODELS = {
     "wxformer": make_wxformer,
     "stormer": make_stormer,
@@ -363,6 +399,8 @@ MODELS = {
     "arches": make_arches,
     "mambavision": make_mambavision,
     "corrdiff": make_corrdiff,
+    "unet": make_unet,
+    "unet_downscaling": make_unet_downscaling,
 }
 
 
