@@ -1,14 +1,17 @@
 """
 Smoke test for all model-zoo models.
-Run on a GPU node: python tests/test_model_zoo.py
-Prints a markdown table of results.
+
+Under pytest (CI, CPU) each model is a separate forward + backward test.
+Run on a GPU node as a script for a markdown table of results: python tests/test_model_zoo.py
 """
 
 import sys
 import os
+import tempfile
 import time
 import traceback
 
+import pytest
 import torch
 
 # Ensure repo root is on path
@@ -136,11 +139,9 @@ def make_graphcast():
         in_channels=C_IN,
         out_channels=C_OUT,
         img_size=(H, W),
-        latent_dim=64,
-        edge_dim=32,
-        processor_depth=2,
-        k_neighbours=4,
-        mlp_hidden=128,
+        mesh_level=2,
+        processor_layers=3,
+        hidden_dim=32,
     ).to(device)
     return m, torch.randn(B, C_IN, H, W, device=device), (B, C_OUT, H, W)
 
@@ -168,9 +169,9 @@ def make_fourcastnet3():
         in_channels=C_IN,
         out_channels=C_OUT,
         img_size=(H, W),
-        base_dim=32,
-        depth=2,
-        n_stages=2,
+        embed_dim=32,
+        num_layers=2,
+        scale_factor=2,
     ).to(device)
     return m, torch.randn(B, C_IN, H, W, device=device), (B, C_OUT, H, W)
 
@@ -216,19 +217,23 @@ def make_pangu():
 
 def make_aifs():
     from credit_zoo.models.aifs.aifs import CREDITAifs
+    from credit_zoo.models.aifs.build_graph import build_graph
 
-    surf_vars = ["2t", "10u"]
-    atmos_vars = ["z", "t"]
-    static_vars = ["lsm"]
-    atmos_levels = [500, 850]
-    m = CREDITAifs(
-        surf_vars=surf_vars,
-        atmos_vars=atmos_vars,
-        static_vars=static_vars,
-        atmos_levels=atmos_levels,
-    ).to(device)
-    C_IN = len(surf_vars) + len(atmos_vars) * len(atmos_levels) + len(static_vars)
-    C_OUT = len(surf_vars) + len(atmos_vars) * len(atmos_levels)
+    C_IN, C_OUT = 20, 18
+    # AIFS needs a pre-built mesh graph; build a small one for this grid (loaded in the constructor)
+    with tempfile.TemporaryDirectory() as tmp:
+        graph_path = os.path.join(tmp, "aifs_graph.pt")
+        build_graph(lat_size=H, lon_size=W, mesh_stride=2, k_g2m=4, k_m2g=4, radius_m2m=None, save_path=graph_path)
+        m = CREDITAifs(
+            in_channels=C_IN,
+            out_channels=C_OUT,
+            img_size=(H, W),
+            num_channels=32,
+            num_layers=2,
+            num_heads=4,
+            trainable_size=4,
+            graph_path=graph_path,
+        ).to(device)
     return m, torch.randn(B, C_IN, H, W, device=device), (B, C_OUT, H, W)
 
 
@@ -344,6 +349,42 @@ def make_corrdiff():
     return m, torch.randn(B, C_IN, H, W, device=device), (B, C_OUT, H, W)
 
 
+def make_unet():
+    from credit_zoo.models.unet.unet import SegmentationModel
+
+    channels, levels, surface, input_only = 4, 4, 2, 2
+    C_IN = channels * levels + surface + input_only
+    C_OUT = channels * levels + surface
+    m = SegmentationModel(
+        image_height=H,
+        image_width=W,
+        frames=1,
+        channels=channels,
+        levels=levels,
+        surface_channels=surface,
+        input_only_channels=input_only,
+        output_only_channels=0,
+        architecture={"name": "unet", "encoder_name": "resnet18", "encoder_weights": None},
+    ).to(device)
+    return m, torch.randn(B, C_IN, 1, H, W, device=device), (B, C_OUT, 1, H, W)
+
+
+def make_unet_downscaling():
+    from credit_zoo.models.unet_downscaling.unet_downscaling import DownscalingSegmentationModel
+
+    channels = {"boundary": 6, "prognostic": 8, "diagnostic": 2}
+    m = DownscalingSegmentationModel(
+        channels=channels,
+        image_height=H,
+        image_width=W,
+        frames=1,
+        architecture={"name": "unet", "encoder_name": "resnet18", "encoder_weights": None},
+    ).to(device)
+    C_IN = channels["boundary"] + channels["prognostic"]
+    C_OUT = channels["prognostic"] + channels["diagnostic"]
+    return m, torch.randn(B, C_IN, 1, H, W, device=device), (B, C_OUT, 1, H, W)
+
+
 MODELS = {
     "wxformer": make_wxformer,
     "stormer": make_stormer,
@@ -363,6 +404,8 @@ MODELS = {
     "arches": make_arches,
     "mambavision": make_mambavision,
     "corrdiff": make_corrdiff,
+    "unet": make_unet,
+    "unet_downscaling": make_unet_downscaling,
 }
 
 
@@ -373,6 +416,9 @@ def run_one(name, factory):
         n_params = _params(model)
 
         y = model(x)
+        # CREDIT models may return (B, C, T=1, H, W); compare against a 4-D expectation without the time dim
+        if y.dim() == 5 and len(expected_shape) == 4 and y.shape[2] == 1:
+            y = y.squeeze(2)
 
         assert y.shape == torch.Size(expected_shape), f"shape {tuple(y.shape)} != {expected_shape}"
         assert not torch.isnan(y).any(), "NaN in output"
@@ -393,6 +439,12 @@ def run_one(name, factory):
             "fwd_bwd_ms": "—",
             "err": traceback.format_exc().strip().splitlines()[-1],
         }
+
+
+@pytest.mark.parametrize("name", list(MODELS))
+def test_forward_backward(name):
+    result = run_one(name, MODELS[name])
+    assert result["status"] == "PASS", result["err"]
 
 
 def main():

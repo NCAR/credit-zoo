@@ -30,7 +30,6 @@ for training from scratch on CREDIT-format ERA5 data with the same architecture.
 import os
 
 import torch
-import torch.nn as nn
 
 from credit_zoo.models.sfno.sfno import SFNOModel, _HARMONICS_AVAILABLE
 

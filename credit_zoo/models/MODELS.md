@@ -209,9 +209,13 @@ Emulator of the Community Atmosphere Model (CAM) dynamics.
 #### U-Net
 Keys: `unet`, `unet_downscaling`
 
-Source: [`credit/models/unet.py`](https://github.com/NCAR/miles-credit/blob/main/credit/models/unet.py)
+Source: [`credit_zoo/models/unet/unet.py`](unet/unet.py),
+[`credit_zoo/models/unet_downscaling/unet_downscaling.py`](unet_downscaling/unet_downscaling.py)
 
-Encoder-decoder U-Net with attention modules.  Also available in downscaling variant.
+segmentation-models-pytorch encoder-decoder (U-Net, U-Net++, FPN, DeepLabV3+, …) with any smp encoder backbone.
+Also available in a downscaling variant. Moved here from `credit.models.unet` / `credit.models.unet_downscaling`
+so that core CREDIT does not depend on segmentation-models-pytorch (NCAR/miles-credit#519); the classes and
+their arguments are unchanged, so existing checkpoints still load. Example config: [`config/unet.yml`](../../config/unet.yml).
 
 #### FuXi
 Key: `fuxi`

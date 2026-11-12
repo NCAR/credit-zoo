@@ -22,7 +22,7 @@ first — credit-zoo assumes a working `credit` install.
 pip install -e .
 ```
 
-installs `credit_zoo` plus `credit` (from `git+ssh://git@github.com/NCAR/miles-credit.git`) and the third-party
+installs `credit_zoo` plus `credit` (from `git+https://github.com/NCAR/miles-credit.git`) and the third-party
 packages the zoo models need. A few per-model accelerators (`flash_attn`, `mamba_ssm`, `torch_scatter`,
 `scikit-learn`, `xarray`) are optional — every model falls back to a pure-PyTorch path when they're absent — and
 live under the `extras` group:
@@ -60,8 +60,8 @@ imported by hand.
 ## Available models
 
 `ace`, `aifs`, `arches`, `aurora`, `climax`, `corrdiff`, `dlesym`, `fengwu`, `fourcastnet`, `fourcastnet3`,
-`fuxi_ens`, `graphcast`, `healpix`, `itransformer`, `mambavision`, `pangu`, `sfno`, `stormer`, `swinrnn` — 19
-architectures ported into CREDIT's `(B, C, H, W)` / `(B, C, T, H, W)` tensor interface. See
+`fuxi_ens`, `graphcast`, `healpix`, `itransformer`, `mambavision`, `pangu`, `sfno`, `stormer`, `swinrnn`, `unet`,
+`unet_downscaling` — 21 architectures ported into CREDIT's `(B, C, H, W)` / `(B, C, T, H, W)` tensor interface. See
 [`credit_zoo/models/MODELS.md`](credit_zoo/models/MODELS.md) for the full per-model reference (papers, source
 links, pretrained-weight availability, and architecture notes).
 
